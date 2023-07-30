@@ -1,0 +1,11 @@
+body {
+  margin: 0;
+
+  .nav-bar {
+    position: fixed;
+    bottom: 3rem;
+    right: 3rem;
+    color: white;
+    z-index: 1000;
+  }
+}

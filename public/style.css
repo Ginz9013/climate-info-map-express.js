@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+}
+body .nav-bar {
+  position: fixed;
+  bottom: 3rem;
+  right: 3rem;
+  color: white;
+  z-index: 1000;
+}/*# sourceMappingURL=style.css.map */
