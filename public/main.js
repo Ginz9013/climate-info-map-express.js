@@ -1,10 +1,20 @@
 // DOM
+const switchEl = document.getElementById("switch");
 const stationsEl = document.getElementById("stations");
 const rainfallEl = document.getElementById("rainfall");
-const clearEl = document.getElementById("clear");
+
+
+switchEl.addEventListener("click", () => {
+  console.dir(switchEl.checked);
+  if(geojsonLayer) {
+    map.removeLayer(geojsonLayer);
+    geojsonLayer = null;
+  } else {
+    showTaiwanShape();
+  }
+})
 
 stationsEl.addEventListener("click", () => StationsInformation());
-
 rainfallEl.addEventListener("click", () => rainfallPage());
 
 // ---- Leaflet 初始化 ----
@@ -45,6 +55,7 @@ async function showTaiwanShape() {
   // 取得台灣地形圖資
   const res = await fetch("taiwan.json");
   const data = await res.json();
+  console.log(data);
 
   // 將 GeoJSON 轉換為 Leaflet 圖層
   geojsonLayer = L.geoJSON(data).addTo(map);
@@ -52,8 +63,8 @@ async function showTaiwanShape() {
   // 設定圖層樣式（可自行定義）
   geojsonLayer.setStyle({
     color: "yellow",
-    weight: 1,
-    Opacity: 0.3,
+    weight: 0.5,
+    Opacity: 0.1,
     fillOpacity: 0,
   });
 }
@@ -62,6 +73,7 @@ async function showTaiwanShape() {
 async function StationsInformation() {
   // 清除圖層
   clearLayer();
+  console.log(map.getZoom());
 
   // --- 取得觀測站資訊 ---
   const res = await fetch(
@@ -86,7 +98,7 @@ async function StationsInformation() {
 
       // Create a Leaflet circle marker for each station
       const circleMarker = L.circleMarker(latlng, {
-        radius: 4,
+        radius: 5,
         fillColor: "white",
         fillOpacity: 0.7,
         color: "transparent", // 設定邊線顏色為透明色
@@ -172,3 +184,29 @@ async function rainfallPage() {
 
   heatmapLayer.addTo(map);
 };
+
+
+// 紫外線資訊業面
+(async function uniInfoPage() {
+
+  const res = await fetch("https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0005-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B");
+  const data = await res.json();
+  const uviList = data.records.weatherElement.location;
+
+  console.log(uviList);
+
+
+  // uviList.forEach(() => {
+  //   const countyName = 
+  // })
+  // const heatmapData = [];
+  //     countiesData.features.forEach(feature => {
+  //       const countyName = feature.properties.name; // 假設 GeoJSON 中行政區名稱屬性為 'name'
+  //       const uviValue = uviData[countyName];
+  //       if (uviValue !== undefined) {
+  //         const { coordinates } = feature.geometry;
+  //         const center = L.GeoJSON.coordsToLatLng(coordinates);
+  //         heatmapData.push([center.lat, center.lng, uviValue]);
+  //       }
+  //     });
+})();

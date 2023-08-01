@@ -16,6 +16,11 @@ body {
     background-color: #fff;
     padding: 1rem;
     border-radius: 4px;
+
+    .toggle-area {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
   }
 }
 
@@ -25,6 +30,7 @@ button {
   background-color: #444;
   color: white;
   padding: 6px 12px;
+  margin: 0 2px;
   border-radius: 4px;
   transition: 0.2s;
 
@@ -36,3 +42,6 @@ button {
     scale: 0.96;
   }
 }
+
+
+

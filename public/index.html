@@ -12,13 +12,23 @@
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""
     />
-    <link rel="stylesheet" href="./stylesheet/style.css" />
+
+    <!-- Style.css -->
+    <link rel="stylesheet" href="./stylesheet/main.css" />
   </head>
   <body>
     <div id="map" style="height: 100vh"></div>
 
     <div class="nav-bar">
       <h1>Express.js</h1>
+      <!-- Rounded switch -->
+      <div class="toggle-area">
+        <small>顯示縣市地圖</small>
+        <label class="switch">
+          <input type="checkbox" id="switch">
+          <span class="slider round"></span>
+        </label>
+      </div>
       <button type="button" id="stations">量測站資訊</button>
       <button type="button" id="rainfall">降雨量</button>
     </div>
