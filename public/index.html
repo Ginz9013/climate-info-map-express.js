@@ -23,14 +23,15 @@
       <h1>Express.js</h1>
       <!-- Rounded switch -->
       <div class="toggle-area">
-        <small>顯示縣市地圖</small>
+        <small>顯示行政區域</small>
         <label class="switch">
-          <input type="checkbox" id="switch">
+          <input type="checkbox" id="switch" />
           <span class="slider round"></span>
         </label>
       </div>
       <button type="button" id="stations">量測站資訊</button>
       <button type="button" id="rainfall">降雨量</button>
+      <button type="button" id="uvi">紫外線指數</button>
     </div>
 
     <!-- Leaflet.js -->
@@ -44,7 +45,12 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <!-- Heatmap.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/heatmap.js/2.0.0/heatmap.min.js" integrity="sha512-FpvmtV53P/z7yzv1TAIVH7PNz94EKXs5aV6ts/Zi+B/VeGU5Xwo6KIbwpTgKc0d4urD/BtkK50IC9785y68/AA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/heatmap.js/2.0.0/heatmap.min.js"
+      integrity="sha512-FpvmtV53P/z7yzv1TAIVH7PNz94EKXs5aV6ts/Zi+B/VeGU5Xwo6KIbwpTgKc0d4urD/BtkK50IC9785y68/AA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
 
     <!-- Leaflet-Heatmap.js -->
     <script src="

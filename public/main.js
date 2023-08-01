@@ -2,20 +2,21 @@
 const switchEl = document.getElementById("switch");
 const stationsEl = document.getElementById("stations");
 const rainfallEl = document.getElementById("rainfall");
+const uviEl = document.getElementById("uvi");
 
-
+// Listener
 switchEl.addEventListener("click", () => {
   console.dir(switchEl.checked);
-  if(geojsonLayer) {
+  if (geojsonLayer) {
     map.removeLayer(geojsonLayer);
     geojsonLayer = null;
   } else {
     showTaiwanShape();
   }
-})
-
+});
 stationsEl.addEventListener("click", () => StationsInformation());
 rainfallEl.addEventListener("click", () => rainfallPage());
+uviEl.addEventListener("click", () => uviInfoPage());
 
 // ---- Leaflet 初始化 ----
 const map = L.map("map").setView([23.6978, 120.9605], 8);
@@ -35,20 +36,23 @@ Stadia_AlidadeSmoothDark.addTo(map);
 let geojsonLayer = null;
 let stationMarkers = null;
 let heatmapLayer = null;
+let uviMapLayer = null;
 // ---- Layer ----
-
 
 // ---- ClearLayer ----
 function clearLayer() {
-  if(stationMarkers) {
+  if (stationMarkers) {
     map.removeLayer(stationMarkers);
   }
 
-  if(heatmapLayer) {
+  if (heatmapLayer) {
     map.removeLayer(heatmapLayer);
   }
-}
 
+  if (uviMapLayer) {
+    map.removeLayer(uviMapLayer);
+  }
+}
 
 // --- 顯示台灣向量輪廓 ---
 async function showTaiwanShape() {
@@ -62,14 +66,14 @@ async function showTaiwanShape() {
 
   // 設定圖層樣式（可自行定義）
   geojsonLayer.setStyle({
-    color: "yellow",
+    color: "white",
     weight: 0.5,
     Opacity: 0.1,
     fillOpacity: 0,
   });
 }
 
-// 觀測站資訊頁面
+// --- 觀測站資訊頁面 ---
 async function StationsInformation() {
   // 清除圖層
   clearLayer();
@@ -135,13 +139,15 @@ async function StationsInformation() {
   update();
 }
 
-// 降雨資訊頁面
+// --- 降雨資訊頁面 ---
 async function rainfallPage() {
   // 清除圖層
   clearLayer();
 
   // ---- Leaflet-Heatmap.js ----
-  const res = await fetch("https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B&limit=100&parameterName=CITY");
+  const res = await fetch(
+    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B&limit=100&parameterName=CITY"
+  );
   const data = await res.json();
   const rainfallInfo = data.records.location;
   console.log(rainfallInfo);
@@ -153,60 +159,117 @@ async function rainfallPage() {
   //   console.log(err)
   // })
 
-
   // 重組降雨資料
   let infoArr = rainfallInfo.map((location) => ({
     x: location.lon,
     y: location.lat,
-    value: location.weatherElement[6].elementValue
-  }))
+    value: location.weatherElement[6].elementValue,
+  }));
 
   // console.log(arr);
 
   const option = {
-    "scaleRadius": false,
-    "radius": 50,
-    "useLocalExtrema": true,
-    latField: 'y',
-    lngField: 'x',
-    valueField: 'value',
-    "maxOpacity": .5
+    scaleRadius: false,
+    radius: 50,
+    useLocalExtrema: true,
+    latField: "y",
+    lngField: "x",
+    valueField: "value",
+    maxOpacity: 0.5,
   };
 
   heatmapLayer = new HeatmapOverlay(option);
   console.log(heatmapLayer);
 
   const testData = {
-      max: 100,
-      data: infoArr
+    max: 100,
+    data: infoArr,
   };
   heatmapLayer.setData(testData);
 
   heatmapLayer.addTo(map);
-};
+}
 
+// --- 紫外線資訊頁面 ---
+async function uviInfoPage() {
+  // 清除圖層
+  clearLayer();
 
-// 紫外線資訊業面
-(async function uniInfoPage() {
+  // 取得觀測站資料（靜態）
+  const stationsRes = await fetch("stations.json");
+  const stations = await stationsRes.json();
+  const stationList =
+    stations.cwbdata.resources.resource.data.stationsStatus.station;
 
-  const res = await fetch("https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0005-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B");
+  console.log(stationList);
+
+  const res = await fetch(
+    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0005-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
+  );
   const data = await res.json();
   const uviList = data.records.weatherElement.location;
 
   console.log(uviList);
 
+  let uviData = {};
 
-  // uviList.forEach(() => {
-  //   const countyName = 
-  // })
-  // const heatmapData = [];
-  //     countiesData.features.forEach(feature => {
-  //       const countyName = feature.properties.name; // 假設 GeoJSON 中行政區名稱屬性為 'name'
-  //       const uviValue = uviData[countyName];
-  //       if (uviValue !== undefined) {
-  //         const { coordinates } = feature.geometry;
-  //         const center = L.GeoJSON.coordsToLatLng(coordinates);
-  //         heatmapData.push([center.lat, center.lng, uviValue]);
-  //       }
-  //     });
-})();
+  uviList.forEach((item) => {
+    stationList.forEach((station) => {
+      if (item.locationCode === station.StationID) {
+        if (uviData[station.CountyName] !== undefined) {
+          uviData[station.CountyName] = +(
+            (uviData[station.CountyName] + item.value) /
+            2
+          ).toFixed(2);
+        } else {
+          uviData[station.CountyName] = item.value;
+        }
+      }
+    });
+  });
+
+  console.log(uviData);
+
+  const geoRes = await fetch("taiwan.json");
+  const geoData = await geoRes.json();
+
+  geoData.features.forEach((feature) => {
+    const countyName = feature.properties.NAME_2014; // 假設 GeoJSON 中行政區名稱屬性為 'name'
+    const uviValue = uviData[countyName];
+    if (uviValue !== undefined) {
+      feature.properties.uviValue = uviValue;
+    }
+  });
+
+  uviMapLayer = L.geoJSON(geoData, {
+    style: function (feature) {
+      // 根據人口數量來設定顏色
+      const uvi = feature.properties.uviValue;
+      return {
+        fillColor: getColorByUvi(uvi), // 使用自訂函式來取得顏色
+        weight: 1,
+        color: "white",
+        fillOpacity: 0.3,
+      };
+    },
+  }).addTo(map);
+
+  function getColorByUvi(uvi) {
+    if (uvi < 3) {
+      return "green";
+    } else if (uvi < 6) {
+      return "orange";
+    } else if (uvi < 8) {
+      return "brown";
+    } else if (uvi < 11) {
+      return "red";
+    } else {
+      return "purple";
+    }
+  }
+
+  console.log(geoData);
+}
+
+// ---- 降雨量資訊頁面 ----
+// (async function )
