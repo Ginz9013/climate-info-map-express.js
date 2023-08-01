@@ -12,7 +12,7 @@
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""
     />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./stylesheet/style.css" />
   </head>
   <body>
     <div id="map" style="height: 100vh"></div>
@@ -20,6 +20,7 @@
     <div class="nav-bar">
       <h1>Express.js</h1>
       <button type="button" id="stations">量測站資訊</button>
+      <button type="button" id="rainfall">降雨量</button>
     </div>
 
     <!-- Leaflet.js -->
@@ -29,9 +30,18 @@
       crossorigin=""
     ></script>
 
-    <!-- d3.js -->
+    <!-- D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
+    <!-- Heatmap.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heatmap.js/2.0.0/heatmap.min.js" integrity="sha512-FpvmtV53P/z7yzv1TAIVH7PNz94EKXs5aV6ts/Zi+B/VeGU5Xwo6KIbwpTgKc0d4urD/BtkK50IC9785y68/AA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Leaflet-Heatmap.js -->
+    <script src="
+    https://cdn.jsdelivr.net/npm/leaflet-heatmap@1.0.0/leaflet-heatmap.min.js
+    "></script>
+
+    <!-- main.js -->
     <script src="./main.js" type="module"></script>
   </body>
 </html>

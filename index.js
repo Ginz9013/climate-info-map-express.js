@@ -8,5 +8,5 @@ app.get("/", function (req, res) {
 });
 
 const server = app.listen(5055, () =>
-  console.log(`Server Running... port: http://localhost:3000`)
+  console.log(`Server Running... port: http://localhost:5055`)
 );

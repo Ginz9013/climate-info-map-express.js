@@ -1,6 +1,11 @@
 body {
   margin: 0;
 }
+body h1 {
+  margin: 0;
+  margin-bottom: 1rem;
+  text-align: center;
+}
 body .nav-bar {
   position: fixed;
   bottom: 3rem;
