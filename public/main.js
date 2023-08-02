@@ -271,5 +271,11 @@ async function uviInfoPage() {
   console.log(geoData);
 }
 
-// ---- 降雨量資訊頁面 ----
-// (async function )
+// ---- 氣溫資訊頁面 ----
+(async function temperaturePage() {
+  const res = await fetch(
+    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
+  );
+  const data = await res.json();
+  console.log(data);
+})();
