@@ -5,6 +5,9 @@ const rainfallEl = document.getElementById("rainfall");
 const uviEl = document.getElementById("uvi");
 const tempEl = document.getElementById("temp");
 
+const rainfallSliderEl = document.querySelector("#rainfallSlider");
+const tempSliderEl = document.querySelector("#tempSlider");
+
 // Listener
 switchEl.addEventListener("click", () => {
   if (geojsonLayer) {
@@ -14,14 +17,28 @@ switchEl.addEventListener("click", () => {
     showTaiwanShape();
   }
 });
-stationsEl.addEventListener("click", () => StationsInformation());
+
+stationsEl.addEventListener("click", () => {
+  deleteSlider();
+  StationsInformation();
+});
+
 rainfallEl.addEventListener("click", () => {
+  deleteSlider();
   rainfallPage(5);
   showRainfallSlider();
 });
-uviEl.addEventListener("click", () => uviInfoPage());
-tempEl.addEventListener("click", () => temperaturePage());
 
+uviEl.addEventListener("click", () => {
+  deleteSlider();
+  uviInfoPage();
+});
+
+tempEl.addEventListener("click", () => {
+  deleteSlider();
+  temperaturePage("temp");
+  shwoTempSlider();
+});
 
 // ---- Leaflet 初始化 ----
 const map = L.map("map").setView([23.6978, 120.9605], 8);
@@ -45,6 +62,13 @@ let uviMapLayer = null;
 let tempLayer = null;
 // ---- Layer ----
 
+// ---- Global Variable ----
+let geoData = null;
+let stations = null;
+let rainfallInfo = null;
+let tempDataList = {};
+// ---- Global Variable ----
+
 // ---- ClearLayer ----
 function clearLayer() {
   if (stationMarkers) {
@@ -59,7 +83,7 @@ function clearLayer() {
     map.removeLayer(uviMapLayer);
   }
 
-  if(tempLayer) {
+  if (tempLayer) {
     map.removeLayer(tempLayer);
   }
 }
@@ -88,12 +112,13 @@ async function StationsInformation() {
   clearLayer();
 
   // --- 取得觀測站資訊 ---
-  const res = await fetch(
-    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
-  );
-  const data = await res.json();
-
-  const stations = data.records.location;
+  if (stations === null) {
+    const res = await fetch(
+      "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
+    );
+    const data = await res.json();
+    stations = data.records.location;
+  }
 
   // 使用 D3 繪製觀測站位置
   drawObservationStations(stations);
@@ -157,18 +182,13 @@ async function rainfallPage() {
   clearLayer();
 
   // ---- Leaflet-Heatmap.js ----
-  const res = await fetch(
-    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B&limit=100&parameterName=CITY"
-  );
-  const data = await res.json();
-  const rainfallInfo = data.records.location;
-
-  // 重組降雨資料
-  let infoArr = rainfallInfo.map((location) => ({
-    x: location.lon,
-    y: location.lat,
-    value: location.weatherElement[6].elementValue,
-  }));
+  if (rainfallInfo === null) {
+    const res = await fetch(
+      "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B&limit=100&parameterName=CITY"
+    );
+    const data = await res.json();
+    rainfallInfo = data.records.location;
+  }
 
   const option = {
     scaleRadius: false,
@@ -182,23 +202,13 @@ async function rainfallPage() {
 
   heatmapLayer = new HeatmapOverlay(option);
 
-  const testData = {
-    max: 100,
-    data: infoArr,
-  };
-  heatmapLayer.setData(testData);
+  updateRainfallData(6);
 
   heatmapLayer.addTo(map);
 }
 
 // ---- 更新降雨資訊 ----
 async function updateRainfallData(time) {
-  const res = await fetch(
-    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0002-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B&limit=100&parameterName=CITY"
-  );
-  const data = await res.json();
-  const rainfallInfo = data.records.location;
-
   // 重組降雨資料
   let infoArr = rainfallInfo.map((location) => ({
     x: location.lon,
@@ -206,7 +216,7 @@ async function updateRainfallData(time) {
     value: location.weatherElement[time].elementValue,
   }));
 
-  // 重新渲染地圖
+  // 渲染地圖
   if (heatmapLayer) {
     heatmapLayer.setData({ max: 100, data: infoArr });
   }
@@ -215,44 +225,52 @@ async function updateRainfallData(time) {
 // ---- 降雨頁面控制項 ----
 function showRainfallSlider() {
   // NoUiSlider.js
-  const sliderEl = document.querySelector("#slider");
-
-  noUiSlider.create(sliderEl, {
+  noUiSlider.create(rainfallSliderEl, {
     start: [5],
     step: 1,
     range: {
-        'min': 0,
-        'max': 8
+      min: 0,
+      max: 8,
     },
     pips: {
-        mode: 'values',
-        values: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        // [2, 1, 3, 4, 5, 6, 7, 8, 9]
-        density: 100,
-        format: {
-            to: customPipFormatter
-        }
-    }
+      mode: "values",
+      values: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      // [2, 1, 3, 4, 5, 6, 7, 8, 9]
+      density: 100,
+      format: {
+        to: customPipFormatter,
+      },
+    },
   });
 
   function customPipFormatter(value) {
-    var labels = ['10min', '60min', '3hours', '6hours', '12hours', '24hours', 'Today', '2days', '3days'];
+    var labels = [
+      "10min",
+      "60min",
+      "3hours",
+      "6hours",
+      "12hours",
+      "24hours",
+      "Today",
+      "2days",
+      "3days",
+    ];
     return labels[value];
   }
 
-  sliderEl.noUiSlider.on('update', function (values, handle) {
+  rainfallSliderEl.noUiSlider.on("update", function (values, handle) {
     const option = +(+values[handle]).toFixed(0);
 
     let time = 1;
 
-    if(option === 0) {
+    if (option === 0) {
       time = 2;
     } else if (option > 1) {
       time = option + 1;
     }
-    
+
     updateRainfallData(time);
-  });;
+  });
 }
 
 // --- 紫外線資訊頁面 ---
@@ -329,84 +347,109 @@ async function uviInfoPage() {
 }
 
 // ---- 氣溫資訊頁面 ----
-async function temperaturePage() {
-  const res = await fetch(
-    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
-  );
-  const data = await res.json();
-  const stations = data.records.location;
+async function temperaturePage(prop) {
+  // 清除圖層
+  clearLayer();
 
-  let tempDataList = {};
-  // ---- 組各縣市氣溫資料 ----
-  stations.forEach(station => {
-    // tempDataList 沒有資料，直接新增
-    if(tempDataList[station.parameter[0].parameterValue] === undefined) {
+  if (stations === null) {
+    const res = await fetch(
+      "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
+    );
+    const data = await res.json();
+    stations = data.records.location;
+  }
 
-      let countyTemp = {};
+  // 如果變數為空物件，組各縣市氣溫資料
+  if (Object.keys(tempDataList).length === 0) {
+    console.log("set");
+    stations.forEach((station) => {
+      // tempDataList 沒有資料，直接新增
+      if (tempDataList[station.parameter[0].parameterValue] === undefined) {
+        let countyTemp = {};
 
-      // 現在溫度
-      countyTemp.temp = +station.weatherElement[3].elementValue === -99 ?
-        null : +station.weatherElement[3].elementValue;
+        // 現在溫度
+        countyTemp.temp =
+          +station.weatherElement[3].elementValue === -99
+            ? null
+            : +station.weatherElement[3].elementValue;
 
-      // 最高溫
-      countyTemp.D_TX = +station.weatherElement[10].elementValue === -99 ?
-        null : +station.weatherElement[10].elementValue;
+        // 最高溫
+        countyTemp.D_TX =
+          +station.weatherElement[10].elementValue === -99
+            ? null
+            : +station.weatherElement[10].elementValue;
 
-      // 最低溫
-      countyTemp.D_TN = +station.weatherElement[12].elementValue === -99 ?
-        null : +station.weatherElement[12].elementValue;
+        // 最低溫
+        countyTemp.D_TN =
+          +station.weatherElement[12].elementValue === -99
+            ? null
+            : +station.weatherElement[12].elementValue;
 
-      tempDataList[station.parameter[0].parameterValue]= countyTemp;
-    } 
-    // tempDataList 已有資料，相加平均
-    else {
-      let county = tempDataList[station.parameter[0].parameterValue];
-
-      // 現在溫度
-      if(county.temp !== null && 
-        +station.weatherElement[3].elementValue !== -99) {
-
-          county.temp = +((county.temp + +station.weatherElement[3].elementValue) / 2).toFixed(2);
-
-      } else if (county.temp === null &&
-        +station.weatherElement[3].elementValue !== -99) {
-
-        county.temp = +station.weatherElement[3].elementValue;
+        tempDataList[station.parameter[0].parameterValue] = countyTemp;
       }
+      // tempDataList 已有資料，相加平均
+      else {
+        let county = tempDataList[station.parameter[0].parameterValue];
 
-      // 最高溫
-      if(county.D_TX !== null && 
-        +station.weatherElement[10].elementValue !== -99) {
+        // 現在溫度
+        if (
+          county.temp !== null &&
+          +station.weatherElement[3].elementValue !== -99
+        ) {
+          county.temp = +(
+            (county.temp + +station.weatherElement[3].elementValue) /
+            2
+          ).toFixed(2);
+        } else if (
+          county.temp === null &&
+          +station.weatherElement[3].elementValue !== -99
+        ) {
+          county.temp = +station.weatherElement[3].elementValue;
+        }
 
-        county.D_TX = +((county.D_TX + +station.weatherElement[10].elementValue) / 2).toFixed(2);
+        // 最高溫
+        if (
+          county.D_TX !== null &&
+          +station.weatherElement[10].elementValue !== -99
+        ) {
+          county.D_TX = +(
+            (county.D_TX + +station.weatherElement[10].elementValue) /
+            2
+          ).toFixed(2);
+        } else if (
+          county.D_TX === null &&
+          +station.weatherElement[10].elementValue !== -99
+        ) {
+          county.D_TX = +station.weatherElement[10].elementValue;
+        }
 
-      } else if (county.D_TX === null &&
-        +station.weatherElement[10].elementValue !== -99) {
-
-        county.D_TX = +station.weatherElement[10].elementValue;
+        // 最低溫
+        if (
+          county.D_TN !== null &&
+          +station.weatherElement[12].elementValue !== -99
+        ) {
+          county.D_TN = +(
+            (county.D_TN + +station.weatherElement[12].elementValue) /
+            2
+          ).toFixed(2);
+        } else if (
+          county.D_TN === null &&
+          +station.weatherElement[12].elementValue !== -99
+        ) {
+          county.D_TN = +station.weatherElement[12].elementValue;
+        }
       }
-
-      // 最低溫
-      if(county.D_TN !== null && 
-        +station.weatherElement[12].elementValue !== -99) {
-
-        county.D_TN = +((county.D_TN + +station.weatherElement[12].elementValue) / 2).toFixed(2);
-
-      } else if (county.D_TN === null &&
-        +station.weatherElement[12].elementValue !== -99) {
-
-        county.D_TN = +station.weatherElement[12].elementValue;
-      }
-    }
-  })
-  // ---- 組各縣市氣溫資料 ----
+    });
+  }
 
   // 取得台灣 GeoData
-  const geoRes = await fetch("taiwan.json");
-  const geoData = await geoRes.json();
+  if (geoData === null) {
+    const geoRes = await fetch("taiwan.json");
+    geoData = await geoRes.json();
+  }
 
   // 加入各縣市 GeoData 的屬性
-  geoData.features.forEach(feature => {
+  geoData.features.forEach((feature) => {
     const countyName = feature.properties.NAME_2014;
     const tempValue = tempDataList[countyName].temp;
     const D_TX = tempDataList[countyName].D_TX;
@@ -423,7 +466,12 @@ async function temperaturePage() {
     if (D_TN !== undefined) {
       feature.properties.D_TN = D_TN;
     }
-  })
+  });
+
+  // 如果已經存在，刪除掉重新綁定
+  if (tempLayer) {
+    map.removeLayer(tempLayer);
+  }
 
   // 創造圖層並加入 Leaflet
   tempLayer = L.geoJSON(geoData, {
@@ -432,8 +480,14 @@ async function temperaturePage() {
       const temp = feature.properties.temp;
       const D_TX = feature.properties.D_TX;
       const D_TN = feature.properties.D_TN;
+
       return {
-        fillColor: getColorBytemp(D_TX), // 使用自訂函式來取得顏色
+        fillColor:
+          prop === "temp"
+            ? getColorBytemp(temp)
+            : prop === "D_TX"
+            ? getColorBytemp(D_TX)
+            : getColorBytemp(D_TN), // 使用自訂函式來取得顏色
         weight: 1,
         color: "white",
         fillOpacity: 0.3,
@@ -441,23 +495,83 @@ async function temperaturePage() {
     },
   }).addTo(map);
 
-
   // 判斷區域顏色的方法
   function getColorBytemp(temp) {
     if (temp <= 9) {
       return "blue";
-    } else if(temp <= 18) {
-      return "rgb(0, 128, 100)"
+    } else if (temp <= 18) {
+      return "rgb(0, 128, 100)";
     } else if (temp <= 23) {
       return "green";
     } else if (temp <= 26) {
       return "rgb(94, 128, 0)";
     } else if (temp <= 32) {
       return "yellow";
-    } else if (temp <+ 38) {
+    } else if (temp < +38) {
       return "orange";
     } else {
       return "red";
     }
   }
-};
+}
+
+// ---- 氣溫頁面控制項 ----
+function shwoTempSlider() {
+  // NoUiSlider.js
+  noUiSlider.create(tempSliderEl, {
+    start: [1],
+    step: 1,
+    range: {
+      min: 0,
+      max: 2,
+    },
+    pips: {
+      mode: "values",
+      values: [0, 1, 2],
+      density: 100,
+      format: {
+        to: customPipFormatter,
+      },
+    },
+  });
+
+  function customPipFormatter(value) {
+    let labels = ["最低溫度", "平均溫度", "最高溫度"];
+    return labels[value];
+  }
+
+  tempSliderEl.noUiSlider.on("update", function (values, handle) {
+    console.log("switch");
+    const option = +(+values[handle]).toFixed(0);
+
+    let prop;
+
+    switch (option) {
+      case 0:
+        prop = "D_TN";
+        break;
+      case 1:
+        prop = "temp";
+        break;
+      case 2:
+        prop = "D_TX";
+        break;
+    }
+
+    temperaturePage(prop);
+  });
+}
+
+// ---- 刪除 Slider ----
+function deleteSlider() {
+  if (rainfallSliderEl.classList.contains("noUi-target")) {
+    // 如果包含 noUi-target 类，说明滑块已经创建，可以使用 destroy() 方法销毁
+    rainfallSliderEl.noUiSlider.destroy();
+    console.log("delete rainfall");
+  }
+
+  if (tempSliderEl.classList.contains("noUi-target")) {
+    tempSliderEl.noUiSlider.destroy();
+    console.log("delete rainfall");
+  }
+}

@@ -9,13 +9,17 @@ body {
 
   .nav-bar {
     position: fixed;
-    bottom: 3rem;
+    top: 70vh;
     right: 3rem;
     color: black;
     z-index: 1000;
     background-color: #fff;
     padding: 1rem 2rem;
     border-radius: 4px;
+
+    // h1 {
+    //   letter-spacing: 4px;
+    // }
 
     .toggle-area {
       text-align: center;
@@ -44,8 +48,5 @@ button {
 }
 
 p {
-  color:  rgb(0, 128, 100);
+  color: rgb(0, 128, 100);
 }
-
-
-

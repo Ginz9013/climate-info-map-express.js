@@ -14,7 +14,13 @@
     />
 
     <!-- NoUiSlider.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.css" integrity="sha512-MKxcSu/LDtbIYHBNAWUQwfB3iVoG9xeMCm32QV5hZ/9lFaQZJVaXfz9aFa0IZExWzCpm7OWvp9zq9gVip/nLMg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.css"
+      integrity="sha512-MKxcSu/LDtbIYHBNAWUQwfB3iVoG9xeMCm32QV5hZ/9lFaQZJVaXfz9aFa0IZExWzCpm7OWvp9zq9gVip/nLMg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 
     <!-- Style.css -->
     <link rel="stylesheet" href="./stylesheet/main.css" />
@@ -23,7 +29,7 @@
     <div id="map" style="height: 100vh"></div>
 
     <div class="nav-bar">
-      <h1>Express.js</h1>
+      <h1>氣候資訊地圖</h1>
       <!-- Rounded switch -->
       <div class="toggle-area">
         <small>顯示行政區域</small>
@@ -37,7 +43,8 @@
       <button type="button" id="uvi">紫外線指數</button>
       <button type="button" id="temp">氣溫</button>
 
-      <div id="slider"></div>
+      <div id="rainfallSlider" class="no-ui-slider"></div>
+      <div id="tempSlider" class="no-ui-slider"></div>
     </div>
 
     <!-- Leaflet.js -->
@@ -64,7 +71,12 @@
     "></script>
 
     <!-- NoUiSlider.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js" integrity="sha512-UOJe4paV6hYWBnS0c9GnIRH8PLm2nFK22uhfAvsTIqd3uwnWsVri1OPn5fJYdLtGY3wB11LGHJ4yPU1WFJeBYQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"
+      integrity="sha512-UOJe4paV6hYWBnS0c9GnIRH8PLm2nFK22uhfAvsTIqd3uwnWsVri1OPn5fJYdLtGY3wB11LGHJ4yPU1WFJeBYQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
 
     <!-- main.js -->
     <script src="./main.js" type="module"></script>
