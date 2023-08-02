@@ -72,7 +72,7 @@ body .nav-bar {
   color: black;
   z-index: 1000;
   background-color: #fff;
-  padding: 1rem;
+  padding: 1rem 2rem;
   border-radius: 4px;
 }
 body .nav-bar .toggle-area {
@@ -95,4 +95,25 @@ button:hover {
 }
 button:active {
   scale: 0.96;
+}
+
+p {
+  color: rgb(0, 128, 100);
+}
+
+#slider {
+  margin: 1rem auto 2rem auto;
+}
+
+.noUi-base {
+  background-color: #f0f0f0;
+}
+
+.noUi-connect {
+  background-color: #949494;
+}
+
+.noUi-value {
+  font-size: 12px;
+  margin-top: 6px;
 }/*# sourceMappingURL=main.css.map */
