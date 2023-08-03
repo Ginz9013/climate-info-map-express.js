@@ -20,7 +20,7 @@ switchEl.addEventListener("click", () => {
 
 stationsEl.addEventListener("click", () => {
   deleteSlider();
-  StationsInformation();
+  stationsInformation();
 });
 
 rainfallEl.addEventListener("click", () => {
@@ -37,7 +37,7 @@ uviEl.addEventListener("click", () => {
 tempEl.addEventListener("click", () => {
   deleteSlider();
   temperaturePage("temp");
-  shwoTempSlider();
+  showTempSlider();
 });
 
 // ---- Leaflet 初始化 ----
@@ -66,6 +66,7 @@ let tempLayer = null;
 let geoData = null;
 let stations = null;
 let rainfallInfo = null;
+let uviList = null;
 let tempDataList = {};
 // ---- Global Variable ----
 
@@ -107,7 +108,7 @@ async function showTaiwanShape() {
 }
 
 // --- 觀測站資訊頁面 ---
-async function StationsInformation() {
+async function stationsInformation() {
   // 清除圖層
   clearLayer();
 
@@ -244,7 +245,7 @@ function showRainfallSlider() {
   });
 
   function customPipFormatter(value) {
-    var labels = [
+    let labels = [
       "10min",
       "60min",
       "3hours",
@@ -284,11 +285,13 @@ async function uviInfoPage() {
   const stationList =
     stations.cwbdata.resources.resource.data.stationsStatus.station;
 
-  const res = await fetch(
-    "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0005-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
-  );
-  const data = await res.json();
-  const uviList = data.records.weatherElement.location;
+  if(uviList === null) {
+    const res = await fetch(
+      "https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0005-001?Authorization=CWB-0AFFC5D1-340B-437D-8E6E-BFEACCCBB52B"
+    );
+    const data = await res.json();
+    uviList = data.records.weatherElement.location;
+  }
 
   let uviData = {};
 
@@ -516,7 +519,7 @@ async function temperaturePage(prop) {
 }
 
 // ---- 氣溫頁面控制項 ----
-function shwoTempSlider() {
+function showTempSlider() {
   // NoUiSlider.js
   noUiSlider.create(tempSliderEl, {
     start: [1],
@@ -565,7 +568,7 @@ function shwoTempSlider() {
 // ---- 刪除 Slider ----
 function deleteSlider() {
   if (rainfallSliderEl.classList.contains("noUi-target")) {
-    // 如果包含 noUi-target 类，说明滑块已经创建，可以使用 destroy() 方法销毁
+    // 如果 class 包含 noUi-target，代表 lider 已經建立 
     rainfallSliderEl.noUiSlider.destroy();
     console.log("delete rainfall");
   }
